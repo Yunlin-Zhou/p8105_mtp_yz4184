@@ -1,0 +1,77 @@
+---
+title: "p8105_mtp_yz4184"
+author: "Yunlin Zhou"
+date: "10/28/2021"
+output: html_document
+---
+```{r setup, include = FALSE}
+library(tidyverse)
+library(readxl)
+library(haven)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+
+```{r}
+# Import data
+
+horns_df = read_excel ("./p8105_mtp_data.xlsx", range = "A9:I1230")
+
+# Clean the data
+
+horns_df  = janitor::clean_names(horns_df)
+
+horns_df = horns_df%>%
+  mutate(horns_df,
+    sex = recode(sex, `0` = "female", `1` = "male"),
+    age_group = recode(age_group, 
+                       `1` = "18-",
+                       `2` = "18-30",
+                       `3` = "31-40",
+                       `4` = "41-50",
+                       `5` = "51-60",
+                       `6` = "60+",
+                       `7` = "60+",
+                       `8` = "60+"),
+    eop_size = recode(eop_size, 
+                       `1` = "5-10",
+                       `2` = "10-15",
+                       `3` = "15-20",
+                       `4` = "20-25",
+                       `5` = "25+"),
+    eop_visibility_classification = recode(eop_visibility_classification, 
+                       `0` = "0",
+                       `1` = "0-5",
+                       `2` = "5+"),
+    fhp_category = recode(fhp_category,
+                          `0` = "0-10",
+                       `1` = "10-20",
+                       `2` = "20-30",
+                       `3` = "30-40",
+                       `4` = "40-50"),
+    eop_size_mm = replace (eop_size_mm, is.na (eop_size_mm), 0)
+  )%>%
+  relocate(sex, age_group)%>%
+  arrange(sex,age)
+
+
+  
+
+  
+```
+
