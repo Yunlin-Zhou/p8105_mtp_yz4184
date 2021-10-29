@@ -39,6 +39,7 @@ horns_df  = janitor::clean_names(horns_df)
 horns_df = horns_df %>%
   mutate(horns_df,
     sex = recode(sex, `0` = "female", `1` = "male"),
+    sex = factor(sex, levels = c("female", "male")),
     age_group = recode(age_group, 
                        `1` = "18-",
                        `2` = "18-30",
@@ -48,6 +49,12 @@ horns_df = horns_df %>%
                        `6` = "60+",
                        `7` = "60+",
                        `8` = "60+"),
+      age_group = factor(age_group,levels = 
+                              c("18-30",
+                                "31-40",
+                                "41-50",
+                                "51-60",
+                                "60+")),
     eop_size = recode(eop_size, 
                        `0` = "0-5",
                        `1` = "5-10",
@@ -55,19 +62,29 @@ horns_df = horns_df %>%
                        `3` = "15-20",
                        `4` = "20-25",
                        `5` = "25+"),
+    eop_size =factor(eop_size,
+                           levels = 
+                              c("0-5",
+                                "5-10",
+                                "10-15",
+                                "15-20",
+                                "20-25",
+                                "25+")),
     eop_visibility_classification = recode(eop_visibility_classification, 
                        `0` = "0",
                        `1` = "0-5",
                        `2` = "5+"),
+    eop_visibility_classification =
+      factor(eop_visibility_classification, levels = c("0", "0-5", "5+")),
     fhp_category = recode(fhp_category,
                           `0` = "0-10",
                        `1` = "10-20",
                        `2` = "20-30",
                        `3` = "30-40",
                        `4` = "40-50"),
+    fhp_category = factor(fhp_category, levels = c("0-10", "10-20", "20-30", "30-40", "40-50")),
     eop_size_mm = replace (eop_size_mm, 
-                           is.na (eop_size_mm), 0)
-  )%>%
+                           is.na (eop_size_mm), 0))%>%
   relocate(sex, age_group)%>%
   arrange(sex,age)%>%
   filter(age_group != "18-")
@@ -89,7 +106,7 @@ count(horns_df, age_group)
 
 ```
 
-There are `ncol(horns_df) ` variables and `nrow(horns_df) ` participants which included 614 female and 607 male. There are 2 people under 18, 303 people from 18 to 30, 204 people from 31 to 40, 207 people from 41 to 50, 200 people from 51 to 60 and 305 people above 60. The key vairaibles are sex, FHP and age.
+There are `r ncol(horns_df) ` variables and `r nrow(horns_df) ` participants which included 614 female and 607 male. There are 2 people under 18, 303 people from 18 to 30, 204 people from 31 to 40, 207 people from 41 to 50, 200 people from 51 to 60 and 305 people above 60. The key vairaibles are sex, FHP and age.
 
 ## issues in the available data
 
@@ -117,23 +134,6 @@ fhp_his_plot
 # The rate of enlarged EOP in each age group
 
 rate_df = horns_df %>%
-  mutate(age_group = factor(age_group,
-                            levels = 
-                              c("18-30",
-                                "31-40",
-                                "41-50",
-                                "51-60",
-                                "60+")),
-         eop_size = factor(eop_size,
-                           levels = 
-                              c("0-5",
-                                "5-10",
-                                "10-15",
-                                "15-20",
-                                "20-25",
-                                "25+")),
-         sex = factor(sex)
-         )%>%
   count(age_group, sex, eop_size)
 
 eop = rate_df%>%
