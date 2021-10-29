@@ -7,7 +7,6 @@ output: html_document
 ```{r setup, include = FALSE}
 library(tidyverse)
 library(readxl)
-library(haven)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -26,6 +25,7 @@ scale_colour_discrete = scale_color_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
+# Problem 1
 
 ```{r}
 # Import data
@@ -45,9 +45,9 @@ horns_df = horns_df%>%
                        `3` = "31-40",
                        `4` = "41-50",
                        `5` = "51-60",
-                       `6` = "60+",
-                       `7` = "60+",
-                       `8` = "60+"),
+                       `6` = "61-70",
+                       `7` = "71-80",
+                       `8` = "80+"),
     eop_size = recode(eop_size, 
                        `1` = "5-10",
                        `2` = "10-15",
@@ -69,9 +69,114 @@ horns_df = horns_df%>%
   relocate(sex, age_group)%>%
   arrange(sex,age)
 
+```
 
-  
+## Describe the data cleaning process
 
-  
+According to the setting in the original table, I replaced the representative number with accurate range, and fill in missing values with data. Also I changed column names into lowercase letters and _. I relocated the column orders and reorder the rows by sex and age. 
+
+## Describe the resulting dataset
+
+```{r results='hide', echo = FALSE}
+
+ncol(horns_df)
+nrow(horns_df)
+count(horns_df,sex)
+count(horns_df, age_group)
+```
+
+There are `ncol(horns_df)` variables and `nrow(horns_df)` participants which included 614 female and 607 male. There are 2 people under 18, 303 people from 18 to 30, 204 people from 31 to 40, 207 people from 41 to 50, 200 people from 51 to 60 and 305 people above 60. The key vairaibles are sex, FHP and age.
+
+## issues in the available data
+
+
+# Problem 2 
+
+```{r}
+# FHP histogram
+
+fhp_his_plot = 
+  horns_df %>%
+  ggplot(aes(x = fhp_size_mm, fill = sex))+
+  geom_histogram(position = "dodge", binwidth = 2)+ 
+  labs(
+    title = "FHP size histogram",
+    x = "FHP size (mm)",
+    y = "Different FHP size number"
+  )
+
+fhp_his_plot
+```
+
+
+```{r}
+# rate plot
+
+rate_df_female = horns_df %>%
+  filter(age_group != "18-",
+         eop_size_mm >= 10,
+         sex == "female")%>%
+  group_by(age_group)%>%
+  summarise(group_name = unique(age_group), 
+            eop_mean = mean(eop_size_mm))%>%
+  select(- group_name)%>%
+  mutate(sex = "female")
+
+
+rate_df_male = horns_df %>%
+  filter(age_group != "18-",
+         eop_size_mm >= 10,
+         sex == "male")%>%
+  group_by(age_group)%>%
+  summarise(group_name = unique(age_group),
+            eop_mean =  mean(eop_size_mm))%>%
+  select(- group_name)%>%
+  mutate(sex = "male")
+
+rate_df = bind_rows(rate_df_female, rate_df_male)%>%
+  mutate(age_group_num = recode(age_group,
+                                `18-30` = 1,
+                                `31-40` = 2,
+                                `41-50` = 3,
+                                `51-60` = 4,
+                                `61-70` = 5,
+                                `71-80` = 6,
+                                `80+` = 7))
+
+rate_df_plot = ggplot(rate_df, aes(x = age_group_num, y = eop_mean, color =sex))+
+  geom_point()+
+  geom_line()+
+  labs(
+    title = "The rate of enlarged EOP in each age group",
+    x = "Age group",
+    y = "The rate of enlarged EOP"
+  ) + 
+  scale_x_continuous(
+    breaks = c (1,2,3,4,5,6,7),
+    labels = c("18-30", "31-40", "41-50", "51-60", "61-70", "71-80", "80+")
+  ) 
+
+rate_df_plot
+
+```
+
+```{r fig.asp = 2}
+eop_fhp = 
+horns_df%>%
+  filter(age_group != "18-")%>%
+ggplot(aes(x = eop_size_mm, y = fhp_size_mm))+
+  geom_point()+
+  labs(
+    title = "The association between FHP size and EOP size",
+    x = "EOP size (mm)",
+    y = "FHP size (mm)"
+  ) + 
+  scale_x_continuous(
+    breaks = c(10, 20, 30),
+    labels = c("10", "20", "30")
+  )+
+  facet_wrap(vars(sex,age_group), ncol = 2)
+
+eop_fhp
 ```
 
