@@ -36,7 +36,7 @@ horns_df = read_excel ("./p8105_mtp_data.xlsx", range = "A9:I1230")
 
 horns_df  = janitor::clean_names(horns_df)
 
-horns_df = horns_df%>%
+horns_df = horns_df %>%
   mutate(horns_df,
     sex = recode(sex, `0` = "female", `1` = "male"),
     age_group = recode(age_group, 
@@ -45,10 +45,11 @@ horns_df = horns_df%>%
                        `3` = "31-40",
                        `4` = "41-50",
                        `5` = "51-60",
-                       `6` = "61-70",
-                       `7` = "71-80",
-                       `8` = "80+"),
+                       `6` = "60+",
+                       `7` = "60+",
+                       `8` = "60+"),
     eop_size = recode(eop_size, 
+                       `0` = "0-5",
                        `1` = "5-10",
                        `2` = "10-15",
                        `3` = "15-20",
@@ -64,10 +65,12 @@ horns_df = horns_df%>%
                        `2` = "20-30",
                        `3` = "30-40",
                        `4` = "40-50"),
-    eop_size_mm = replace (eop_size_mm, is.na (eop_size_mm), 0)
+    eop_size_mm = replace (eop_size_mm, 
+                           is.na (eop_size_mm), 0)
   )%>%
   relocate(sex, age_group)%>%
-  arrange(sex,age)
+  arrange(sex,age)%>%
+  filter(age_group != "18-")
 
 ```
 
@@ -83,9 +86,10 @@ ncol(horns_df)
 nrow(horns_df)
 count(horns_df,sex)
 count(horns_df, age_group)
+
 ```
 
-There are `ncol(horns_df)` variables and `nrow(horns_df)` participants which included 614 female and 607 male. There are 2 people under 18, 303 people from 18 to 30, 204 people from 31 to 40, 207 people from 41 to 50, 200 people from 51 to 60 and 305 people above 60. The key vairaibles are sex, FHP and age.
+There are `ncol(horns_df) ` variables and `nrow(horns_df) ` participants which included 614 female and 607 male. There are 2 people under 18, 303 people from 18 to 30, 204 people from 31 to 40, 207 people from 41 to 50, 200 people from 51 to 60 and 305 people above 60. The key vairaibles are sex, FHP and age.
 
 ## issues in the available data
 
@@ -110,50 +114,56 @@ fhp_his_plot
 
 
 ```{r}
-# rate plot
+# The rate of enlarged EOP in each age group
 
-rate_df_female = horns_df %>%
-  filter(age_group != "18-",
-         eop_size_mm >= 10,
-         sex == "female")%>%
-  group_by(age_group)%>%
-  summarise(group_name = unique(age_group), 
-            eop_mean = mean(eop_size_mm))%>%
-  select(- group_name)%>%
-  mutate(sex = "female")
+rate_df = horns_df %>%
+  mutate(age_group = factor(age_group,
+                            levels = 
+                              c("18-30",
+                                "31-40",
+                                "41-50",
+                                "51-60",
+                                "60+")),
+         eop_size = factor(eop_size,
+                           levels = 
+                              c("0-5",
+                                "5-10",
+                                "10-15",
+                                "15-20",
+                                "20-25",
+                                "25+")),
+         sex = factor(sex)
+         )%>%
+  count(age_group, sex, eop_size)
 
+eop = rate_df%>%
+  filter(eop_size%in%c("10-15","15-20","20-25","25+"))%>%
+  group_by(age_group,sex)%>%
+  summarise(eop_num = sum(n))
 
-rate_df_male = horns_df %>%
-  filter(age_group != "18-",
-         eop_size_mm >= 10,
-         sex == "male")%>%
-  group_by(age_group)%>%
-  summarise(group_name = unique(age_group),
-            eop_mean =  mean(eop_size_mm))%>%
-  select(- group_name)%>%
-  mutate(sex = "male")
+total = rate_df%>%
+  group_by(age_group,sex)%>%
+  summarise(total_num = sum(n))
 
-rate_df = bind_rows(rate_df_female, rate_df_male)%>%
-  mutate(age_group_num = recode(age_group,
+rate_df = left_join(eop, total)%>%
+  mutate(rate = eop_num/total_num,
+         age_group_num = recode(age_group,
                                 `18-30` = 1,
                                 `31-40` = 2,
                                 `41-50` = 3,
                                 `51-60` = 4,
-                                `61-70` = 5,
-                                `71-80` = 6,
-                                `80+` = 7))
+                                `60+` = 5))
 
-rate_df_plot = ggplot(rate_df, aes(x = age_group_num, y = eop_mean, color =sex))+
+rate_df_plot = ggplot(rate_df, aes(x = age_group_num, y = rate, color =sex))+
   geom_point()+
   geom_line()+
   labs(
     title = "The rate of enlarged EOP in each age group",
-    x = "Age group",
+    x = "Age group (years)",
     y = "The rate of enlarged EOP"
   ) + 
   scale_x_continuous(
-    breaks = c (1,2,3,4,5,6,7),
-    labels = c("18-30", "31-40", "41-50", "51-60", "61-70", "71-80", "80+")
+    labels = c("18-30", "31-40", "41-50", "51-60", "60+")
   ) 
 
 rate_df_plot
@@ -179,4 +189,3 @@ ggplot(aes(x = eop_size_mm, y = fhp_size_mm))+
 
 eop_fhp
 ```
-
