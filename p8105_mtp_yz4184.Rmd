@@ -219,10 +219,13 @@ eop_fhp
 
 ```{r}
 horns_df%>%count(age_group)
+
 range(horns_df$age)
 
-mean(horns_df$fhp_size_mm)
 
+mean(horns_df$fhp_size_mm, na.rm = T)
+
+sd(horns_df$fhp_size_mm, na.rm = T)
 
 ```
 
