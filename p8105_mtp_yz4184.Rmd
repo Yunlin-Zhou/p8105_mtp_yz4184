@@ -30,11 +30,11 @@ scale_fill_discrete = scale_fill_viridis_d
 ```{r}
 # Import data
 
-horns_df = read_excel ("./p8105_mtp_data.xlsx", range = "A9:I1230")
+horns_df_ori = read_excel ("./p8105_mtp_data.xlsx", range = "A9:I1230")
 
 # Clean the data
 
-horns_df  = janitor::clean_names(horns_df)
+horns_df  = janitor::clean_names(horns_df_ori)
 
 horns_df = horns_df %>%
   mutate(horns_df,
@@ -109,6 +109,31 @@ count(horns_df, age_group)
 There are `r ncol(horns_df) ` variables and `r nrow(horns_df) ` participants which included 614 female and 607 male. There are 2 people under 18, 303 people from 18 to 30, 204 people from 31 to 40, 207 people from 41 to 50, 200 people from 51 to 60 and 305 people above 60. The key vairaibles are sex, FHP and age.
 
 ## issues in the available data
+
+```{r}
+# In FHP category, there is a number not belonging to any group.
+
+strange_fhp = horns_df_ori%>%
+  janitor::clean_names()%>%
+  mutate(fhp_category = as.numeric(fhp_category))%>%
+  filter(fhp_category > 7)
+
+# In EOP shape and FHP size there are missing values
+
+missing_value = horns_df_ori%>%
+  janitor::clean_names()%>%
+  mutate( eop_shape_na = is.na(eop_shape),
+          fhp_size_na = is.na(fhp_size_mm))%>%
+  select(eop_shape, eop_shape_na, fhp_size_mm, fhp_size_na)
+
+# In EOP Size, there is a number not belonging to any group.
+
+strange_eop = horns_df_ori%>%
+  janitor::clean_names()%>%
+  mutate(eop_size = as.numeric(eop_size))%>%
+  filter(eop_size > 5)
+
+```
 
 
 # Problem 2 
@@ -189,3 +214,15 @@ ggplot(aes(x = eop_size_mm, y = fhp_size_mm))+
 
 eop_fhp
 ```
+
+# Problem 3
+
+```{r}
+horns_df%>%count(age_group)
+range(horns_df$age)
+
+mean(horns_df$fhp_size_mm)
+
+
+```
+
