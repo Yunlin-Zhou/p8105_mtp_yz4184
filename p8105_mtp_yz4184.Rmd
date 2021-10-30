@@ -91,24 +91,29 @@ horns_df = horns_df %>%
 
 ```
 
-## Describe the data cleaning process
+### Describe the data cleaning process
 
 According to the setting in the original table, I replaced the representative number with accurate range, and fill in missing values with data. Also I changed column names into lowercase letters and _. I relocated the column orders and reorder the rows by sex and age. 
 
-## Describe the resulting dataset
+### Describe the resulting dataset
 
 ```{r results='hide', echo = FALSE}
 
 ncol(horns_df)
+
 nrow(horns_df)
-count(horns_df,sex)
-count(horns_df, age_group)
+
+sex_num = count(horns_df,sex)
+knitr::kable(sex_num)
+
+age_num = count(horns_df, age_group)
+knitr::kable(age_num)
 
 ```
 
 There are `r ncol(horns_df) ` variables and `r nrow(horns_df) ` participants which included 614 female and 607 male. There are 2 people under 18, 303 people from 18 to 30, 204 people from 31 to 40, 207 people from 41 to 50, 200 people from 51 to 60 and 305 people above 60. The key vairaibles are sex, FHP and age.
 
-## issues in the available data
+### issues in the available data
 
 ```{r}
 # In FHP category, there is a number not belonging to any group.
@@ -138,8 +143,9 @@ strange_eop = horns_df_ori%>%
 
 # Problem 2 
 
+### FHP histogram
+
 ```{r}
-# FHP histogram
 
 fhp_his_plot = 
   horns_df %>%
@@ -152,11 +158,12 @@ fhp_his_plot =
   )
 
 fhp_his_plot
+
 ```
 
+### The rate of enlarged EOP in each age group
 
 ```{r}
-# The rate of enlarged EOP in each age group
 
 rate_df = horns_df %>%
   count(age_group, sex, eop_size)
@@ -195,7 +202,10 @@ rate_df_plot
 
 ```
 
+### The association between FHP size and EOP size in each age and sex group
+
 ```{r fig.asp = 2}
+
 eop_fhp = 
 horns_df%>%
   filter(age_group != "18-")%>%
@@ -217,15 +227,116 @@ eop_fhp
 
 # Problem 3
 
+### Sample sizes in each age group
+
 ```{r}
-horns_df%>%count(age_group)
 
-range(horns_df$age)
+sample_size_each = horns_df%>%count(age_group)
+knitr::kable(sample_size_each)
+
+sample_size = length(horns_df$sex)
+print(sample_size)
+
+sample_range = range(horns_df$age)
+print(sample_range)
+
+```
+
+The sample size and range are approximately the same to that mentioned in article.
+
+### Mean and standard deviations for FHP size
+
+```{r}
+
+# mean and sd of male
+horns_df%>%
+  filter(sex == "male")%>%
+  select(fhp_size_mm)%>%
+t.test(alternative = 'two.sided')
+
+sd_male_df = horns_df%>%
+  filter(sex == "male")%>%
+  mutate(fhp_size_mm = replace(fhp_size_mm, is.na(fhp_size_mm),0))%>%
+  select(fhp_size_mm)
+
+sd_male = as.numeric(unlist(sd_male_df))%>%
+  sd()%>%
+  print()
 
 
-mean(horns_df$fhp_size_mm, na.rm = T)
 
-sd(horns_df$fhp_size_mm, na.rm = T)
+# mean and sd of female
+
+horns_df%>%
+  filter(sex == "female")%>%
+  select(fhp_size_mm)%>%
+t.test(alternative = 'two.sided')
+
+sd_female_df = horns_df%>%
+  filter(sex == "female")%>%
+  mutate(fhp_size_mm = replace(fhp_size_mm, is.na(fhp_size_mm),0))%>%
+  select(fhp_size_mm)
+
+sd_female = as.numeric(unlist(sd_female_df))%>%
+  sd()%>%
+  print()
+
+```
+
+
+
+### Definition of EEOP and variables to evaluate the claim
+
+EEOP : EOP (external occipital protuberance) which exceeded 10 mm in size
+
+eop_size and eop_size_mm could be used to evaluate the claim.
+
+```{r}
+# the prevalence of EEOP
+
+eeop_num = horns_df%>%
+  filter(eop_size %in% c("10-15", "15-20", "20-25", "25+"))%>%
+  nrow()%>%
+  print()
+
+eeop_prev = (eeop_num/nrow(horns_df))%>%print()
+
+```
+
+### FHP in older subjects
+
+```{r}
+# The FHP trend
+
+fhp_density = ggplot(horns_df, aes(x = fhp_size_mm, color = age_group))+
+  geom_density()+
+  labs(
+    title = "Density of FHP size in different age group",
+    x = "FHP size",
+    y = "Density"
+  )
+
+fhp_density
+
+```
+
+```{r}
+
+# FHP >40 mm rate in older subjects
+
+FHP_num = horns_df%>%
+  filter(fhp_size_mm > 40)%>%
+  nrow()%>%
+  print()
+
+FHP_num_older = horns_df%>%
+  filter(fhp_size_mm > 40,
+         age_group == "60+")%>%
+  nrow()%>%
+  print()
+
+fhp_older_rate = (FHP_num_older/FHP_num)%>%print()
+
 
 ```
 
