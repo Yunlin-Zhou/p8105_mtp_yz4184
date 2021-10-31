@@ -98,27 +98,28 @@ horns_df = horns_df %>%
 ```
 
 
-According to the original table, I replaced the group number with accurate range, and fill in missing values with data. Also I tidied up column names, relocated the column orders and reorder the rows by sex and age. 
+According to the original table, I replaced the group number with accurate range, and fill in missing values with data. I tidied up column names, relocated the column orders and reorder the rows by sex and age. Also make some variables into factors and specified the levels.
 
-Key variables:age, fhp_size_mm, eop_size
+The key variables are sex, age, FHP and EOP.
 
 ```{r results='hide', echo = FALSE}
 # Describe the resulting dataset
+horns_df_ori = horns_df_ori%>%
+  janitor::clean_names()
 
-ncol(horns_df)
+ncol(horns_df_ori)
 
-nrow(horns_df)
+nrow(horns_df_ori)
 
-sex_num = count(horns_df,sex)
+sex_num = count(horns_df_ori,sex)
 knitr::kable(sex_num)
 
-age_num = count(horns_df, age_group)
+age_num = count(horns_df_ori, age_group)
 knitr::kable(age_num)
 
 ```
 
-There are `r ncol(horns_df) ` variables and `r nrow(horns_df) ` participants which included 614 female and 607 male. There are 2 people under 18, 303 people from 18 to 30, 204 people from 31 to 40, 207 people from 41 to 50, 200 people from 51 to 60 and 305 people above 60. The key vairaibles are sex, FHP and age.
-
+There are `r ncol(horns_df) ` variables and `r nrow(horns_df) ` participants which included 614 female and 607 male. 
 
 
 ```{r}
@@ -138,20 +139,17 @@ knitr::kable(age_gender)
 # In FHP category, there is a number not belonging to any group.
 
 strange_fhp = horns_df_ori%>%
-  janitor::clean_names()%>%
   mutate(fhp_category = as.numeric(fhp_category))%>%
   filter(fhp_category > 7)
 knitr::kable(strange_fhp)
 
 # age not mapping to age_group
 horns_df_ori%>%
-  janitor::clean_names()%>%
 ggplot(aes(x = age_group, y = age))+geom_point()
 
 # In EOP Size, there is a number not belonging to any group.
 
 strange_eop = horns_df_ori%>%
-  janitor::clean_names()%>%
   mutate(eop_size = as.numeric(eop_size))%>%
   filter(eop_size > 5)
 knitr::kable(strange_eop)
@@ -216,9 +214,9 @@ fhp_his_plot + rate_df_plot
 
 ```
 
-As  shown in the left plot, the distributions are both skewed right and the data seem to be centered around 25. Male are more likely to have higher FHP size.
+In the left plot, the distributions are both skewed right.  Male are more likely to have higher FHP size and the data seems to be centered around 30. The data of female seems to be centered around 25.
 
-The rate of EEOP is different from the plot in the article. Younger and older people have higher EEOP rate than others.
+In the right plot, younger people have the highest EEOP rate than others and people in 40s have the lowest EEOP rate. Men have higher EEOP rate than women.
 
 ```{r fig.asp = 2}
 # The association between FHP size and EOP size in each age and sex group
@@ -242,7 +240,7 @@ ggplot(aes(x = eop_size_mm, y = fhp_size_mm))+
 eop_fhp
 ```
 
-According to the plot, there is no obvious linear association between EOP size and FHP size. Older people and male are more likely to have higher EOP size and FHP size. 
+According to the plot, there is no obvious linear association between EOP size and FHP size. Older people and men are more likely to have higher EOP size and FHP size. 
 
 # Problem 3
 
@@ -338,7 +336,7 @@ fhp_density
 
 ```
 
-As shown in the plot, in 60+ age group, the density is higher in large FHP size.
+As shown in the plot, in 60+ age group, the density is higher in large FHP size than other age groups.
 
 ```{r}
 
@@ -359,3 +357,4 @@ The rate I calculated is close to 34.5%.
 
 # Problem 4
 
+According to the data and plots we have, there is no obvious linear association between EOP size and FHP size, which means we cannot predict EEOP through FHP size. Men always have higher EOP and FHP sizes than women, so the sex might be a factor to predict EEOP. In the article abstract, it suggested sustained poor posture could be the cause of young people EOP. However, there is no data provided for posture of young people related to EOP. We cannot conclude that cell phones are causing horn growth from the data. Also, in the original data, there are only 2 subjects under 18. If we need to look up the association between age  and EEOP, it would be better to have more data of teenagers who always obsessed with cell phone.
