@@ -2,7 +2,7 @@
 title: "p8105_mtp_yz4184"
 author: "Yunlin Zhou"
 date: "10/28/2021"
-output: html_document
+output: github_document
 ---
 ```{r setup, include = FALSE, echo = FALSE}
 library(tidyverse)
@@ -303,7 +303,6 @@ The mean and sd in article are close to those calculated by my data.
 
 EEOP definition: EOP (external occipital protuberance) which exceeded 10 mm in size
 
-eop_size and eop_size_mm could be used to evaluate the claim.
 
 ```{r}
 # the prevalence of EEOP
@@ -317,7 +316,8 @@ eeop_prev = (eeop_num/nrow(horns_df))%>%print()
 
 ```
 
-
+ The prevalence I calculated is close to that in the article.
+eop_size and eop_size_mm could be used to evaluate the claim.
 
 ```{r}
 # FHP in older subjects
@@ -357,4 +357,4 @@ The rate I calculated is close to 34.5%.
 
 # Problem 4
 
-According to the data and plots we have, there is no obvious linear association between EOP size and FHP size, which means we cannot predict EEOP through FHP size. Men always have higher EOP and FHP sizes than women, so the sex might be a factor to predict EEOP. In the article abstract, it suggested sustained poor posture could be the cause of young people EOP. However, there is no data provided for posture of young people related to EOP. We cannot conclude that cell phones are causing horn growth from the data. Also, in the original data, there are only 2 subjects under 18. If we need to look up the association between age  and EEOP, it would be better to have more data of teenagers who always obsessed with cell phone.
+According to the data and plots we have, FHP size distribution is skwed right and the  data center  around 25 to 30. Men and women have some slight difference. The highest rate of EEOP is in 18-30 age group and people in 40s have the lowest rate. As the age grows, the older people are more likely to have high FHP size and the center of FHP data is larger than that among yonger people. There is no obvious linear association between EOP size and FHP size, which means we cannot predict EEOP through FHP size. Men always have higher EOP and FHP sizes than women, so the sex might be a factor to predict EEOP. In the article abstract, it suggested sustained poor posture could be the cause of young people EOP. However, there is no data provided for posture of young people related to EOP. We cannot conclude that cell phones are causing horn growth from the data. Also, in the original data, there are only 2 subjects under 18. If we need to look up the association between age  and EEOP, it would be better to have more data of teenagers who always obsessed with cell phone.
